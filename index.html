@@ -1,0 +1,1039 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UTM Builder · BimaScore</title>
+<meta name="description" content="Build clean, consistent UTM links for BimaScore, Bima Clarity and Bima Analyze.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%235A2EBF'/%3E%3Ctext x='16' y='22' font-family='Arial,sans-serif' font-size='17' font-weight='bold' fill='white' text-anchor='middle'%3EB%3C/text%3E%3C/svg%3E">
+<style>
+  :root{
+    --purple:#5A2EBF;
+    --purple-2:#7544E4;
+    --purple-3:#8E51FF;
+    --purple-tint:#F0F4FF;
+    --ink:#1A1033;
+    --ink-soft:#5B5470;
+    --ink-faint:#8B849E;
+    --line:#E6E2F2;
+    --bg:#F7F6FC;
+    --white:#fff;
+    --ok:#16A34A;
+    --warn:#B45309;
+    --radius:18px;
+    --shadow:0 1px 2px rgba(26,16,51,.04), 0 12px 32px -12px rgba(26,16,51,.12);
+  }
+
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;
+    padding:28px 20px 56px;
+    background:
+      radial-gradient(900px 420px at 12% -10%, #EDE7FF 0%, rgba(237,231,255,0) 60%),
+      radial-gradient(800px 400px at 100% 0%, #F0F4FF 0%, rgba(240,244,255,0) 55%),
+      var(--bg);
+    color:var(--ink);
+    font-family:"Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size:15px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .wrap{max-width:1240px;margin:0 auto}
+
+  /* ---------- Header ---------- */
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    margin-bottom:24px;flex-wrap:wrap;
+  }
+  .brand{display:flex;align-items:center;gap:12px}
+  .logo{
+    width:40px;height:40px;border-radius:12px;
+    background:linear-gradient(140deg,var(--purple-2),var(--purple));
+    color:#fff;display:grid;place-items:center;
+    font-weight:800;font-size:19px;letter-spacing:-.02em;
+    box-shadow:0 8px 18px -8px rgba(90,46,191,.75);
+  }
+  .brand-name{font-weight:700;font-size:15px;letter-spacing:-.01em;display:block;line-height:1.2}
+  .brand-sub{font-size:12px;color:var(--ink-faint);display:block}
+  .pill{
+    display:inline-flex;align-items:center;gap:7px;
+    padding:7px 13px;border-radius:999px;
+    background:#fff;border:1px solid var(--line);
+    font-size:12.5px;font-weight:600;color:var(--purple);
+    box-shadow:0 1px 2px rgba(26,16,51,.04);
+  }
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--ok)}
+
+  /* ---------- Shell ---------- */
+  .shell{display:grid;grid-template-columns:272px minmax(0,1fr);gap:22px;align-items:start}
+  .main{min-width:0}
+
+  /* ---------- Sidebar ---------- */
+  .sidebar{
+    position:sticky;top:24px;
+    max-height:calc(100vh - 48px);
+    display:flex;flex-direction:column;gap:11px;
+    background:#fff;border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:16px 14px 13px;
+  }
+  .side-head{display:flex;align-items:center;gap:8px}
+  .side-head h2{
+    margin:0;font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+    color:var(--ink-faint);
+  }
+  .count{
+    margin-left:auto;font-size:11px;font-weight:700;color:var(--purple);
+    background:var(--purple-tint);border-radius:999px;
+    padding:2px 8px;min-width:22px;text-align:center;
+  }
+  .saved-list{list-style:none;margin:0;padding:0;display:grid;gap:8px;overflow-y:auto;flex:1;min-height:0}
+  .saved-item{
+    display:flex;align-items:center;gap:5px;
+    border:1px solid var(--line);border-radius:12px;background:#FCFBFE;
+    padding:8px 7px 8px 10px;
+    transition:border-color .15s, background .15s, box-shadow .15s;
+  }
+  .saved-item:hover{border-color:#CFC4EC;background:#fff}
+  .saved-item.active{
+    border-color:var(--purple-2);background:#F7F3FF;
+    box-shadow:0 0 0 2px rgba(117,68,228,.12);
+  }
+  .saved-open{
+    flex:1;min-width:0;text-align:left;background:none;border:0;padding:0;
+    font:inherit;color:inherit;cursor:pointer;
+  }
+  .saved-open:focus-visible{outline:2px solid var(--purple-3);outline-offset:3px;border-radius:6px}
+  .saved-campaign{
+    display:block;font-size:12.5px;font-weight:650;letter-spacing:-.01em;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .saved-sub{
+    display:block;font-size:11px;color:var(--ink-faint);margin-top:1px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .saved-actions{display:flex;gap:3px;flex:0 0 auto}
+
+  .side-empty{font-size:12px;color:var(--ink-faint);margin:2px 0 4px;line-height:1.45}
+  .side-foot{
+    font-size:10.5px;color:var(--ink-faint);
+    border-top:1px dashed var(--line);padding-top:9px;line-height:1.4;
+  }
+  .clear-all{
+    background:none;border:0;padding:3px 4px;font:inherit;font-size:11.5px;font-weight:600;
+    color:var(--ink-faint);cursor:pointer;border-radius:6px;text-align:left;
+  }
+  .clear-all:hover{color:#DC2626;background:#FEF2F2}
+  .clear-all[hidden]{display:none}
+
+  /* ---------- Content ---------- */
+  .headline{margin:0 0 6px;font-size:27px;letter-spacing:-.025em;line-height:1.2}
+  .sub{margin:0 0 20px;color:var(--ink-soft);font-size:14.5px;max-width:58ch}
+
+  .grid{display:grid;grid-template-columns:1.15fr .85fr;gap:20px;align-items:start}
+  .col{display:grid;gap:20px}
+
+  .panel{
+    background:var(--white);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:22px;
+  }
+
+  .panel-title{
+    font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--ink-faint);margin:0 0 16px;
+  }
+
+  /* ---------- Destination ---------- */
+  .dest-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+  .dest{position:relative;display:block;cursor:pointer}
+  .dest input{position:absolute;opacity:0;width:0;height:0}
+  .dest-body{
+    border:1.5px solid var(--line);border-radius:14px;
+    padding:12px 12px 13px;background:#fff;
+    transition:border-color .15s ease, background .15s ease, box-shadow .15s ease, transform .15s ease;
+    height:100%;
+  }
+  .dest:hover .dest-body{border-color:#CFC4EC;transform:translateY(-1px)}
+  .dest input:checked + .dest-body{
+    border-color:var(--purple-2);
+    background:linear-gradient(180deg,#FBF9FF,#F5F1FF);
+    box-shadow:0 0 0 3px rgba(117,68,228,.12);
+  }
+  .dest input:focus-visible + .dest-body{outline:2px solid var(--purple-3);outline-offset:2px}
+  .dest-top{display:flex;align-items:center;gap:7px;margin-bottom:4px}
+  .radio{
+    width:14px;height:14px;border-radius:50%;border:1.5px solid #C9C1DE;
+    flex:0 0 auto;position:relative;background:#fff;
+  }
+  .dest input:checked + .dest-body .radio{border-color:var(--purple-2)}
+  .dest input:checked + .dest-body .radio::after{
+    content:"";position:absolute;inset:2.5px;border-radius:50%;background:var(--purple-2);
+  }
+  .dest-name{font-size:13.5px;font-weight:650;letter-spacing:-.01em}
+  .dest-host{font-size:11.5px;color:var(--ink-faint);word-break:break-all}
+
+  /* ---------- Fields ---------- */
+  .field{margin-bottom:15px}
+  .field:last-of-type{margin-bottom:0}
+  .field label{
+    display:flex;align-items:center;gap:6px;
+    font-size:13px;font-weight:600;margin-bottom:6px;
+  }
+  .req{color:#DC2626;font-size:12px;line-height:1}
+  .opt{font-size:11px;font-weight:500;color:var(--ink-faint);background:#F3F1F9;padding:1px 6px;border-radius:5px}
+  .hint{font-size:11.5px;color:var(--ink-faint);margin:6px 0 0}
+
+  input[type=text], input[type=url]{
+    width:100%;height:44px;
+    padding:0 13px;
+    font:inherit;font-size:14px;color:var(--ink);
+    background:#FCFBFE;
+    border:1.5px solid var(--line);
+    border-radius:12px;
+    transition:border-color .15s, box-shadow .15s, background .15s;
+    -webkit-appearance:none;appearance:none;
+  }
+  input::placeholder{color:#A9A2BC}
+  input:hover{border-color:#D8D2E8}
+  input:focus{
+    outline:none;background:#fff;
+    border-color:var(--purple-2);
+    box-shadow:0 0 0 3px rgba(117,68,228,.13);
+  }
+  input.invalid{border-color:#F0AFAF;background:#FFF9F9}
+  input.invalid:focus{box-shadow:0 0 0 3px rgba(220,38,38,.1)}
+
+  .path-row{display:flex;align-items:center;position:relative}
+  .path-prefix{
+    position:absolute;left:13px;font-size:14px;color:var(--ink-faint);pointer-events:none;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  .path-row input{padding-left:26px}
+
+  /* ---------- Advanced ---------- */
+  .adv{border-top:1px dashed var(--line);margin-top:18px;padding-top:14px}
+  .adv summary{
+    cursor:pointer;list-style:none;font-size:12.5px;font-weight:600;color:var(--purple);
+    display:flex;align-items:center;gap:7px;user-select:none;
+  }
+  .adv summary::-webkit-details-marker{display:none}
+  .adv summary::before{
+    content:"";width:6px;height:6px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;
+    transform:rotate(-45deg);transition:transform .15s;margin-right:2px;
+  }
+  .adv[open] summary::before{transform:rotate(45deg)}
+  .adv-body{padding-top:14px}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+  /* ---------- Output ---------- */
+  .out-panel{position:sticky;top:24px}
+  .edit-bar{
+    display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+    background:var(--purple-tint);border:1px solid #DCD3F5;border-radius:11px;
+    padding:8px 11px;margin-bottom:12px;font-size:12px;color:var(--purple);font-weight:600;
+  }
+  .edit-bar[hidden]{display:none}
+  .edit-dot{width:6px;height:6px;border-radius:50%;background:var(--purple-2);flex:0 0 auto}
+  .link-btn{
+    margin-left:auto;background:none;border:0;padding:0;font:inherit;font-size:11.5px;
+    font-weight:650;color:var(--purple);text-decoration:underline;cursor:pointer;
+  }
+
+  .url-box{
+    background:#1A1033;
+    border-radius:14px;
+    padding:16px 16px 17px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:12.8px;line-height:1.75;
+    word-break:break-all;
+    color:#EDE9FA;
+    border:1px solid #2A1D4D;
+    min-height:96px;
+  }
+  .url-box .base{color:#B7AED6}
+  .url-box .k{color:#C4A3FF}
+  .url-box .v{color:#FFFFFF;font-weight:500}
+  .url-box .sep{color:#8E51FF}
+  .url-empty{color:#6F6591;font-style:italic;font-family:inherit}
+
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    height:44px;padding:0 18px;border-radius:12px;
+    font:inherit;font-size:14px;font-weight:600;
+    border:1.5px solid transparent;cursor:pointer;
+    transition:transform .12s, box-shadow .15s, background .15s, opacity .15s, border-color .15s;
+    white-space:nowrap;
+  }
+  .btn:active{transform:translateY(1px)}
+  .btn-primary{
+    background:linear-gradient(140deg,var(--purple-2),var(--purple));
+    color:#fff;width:100%;margin-top:14px;
+    box-shadow:0 8px 20px -10px rgba(90,46,191,.8);
+  }
+  .btn-primary:hover:not(:disabled){box-shadow:0 12px 26px -10px rgba(90,46,191,.9)}
+  .btn-primary:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+  .btn-ghost{
+    background:#fff;border-color:var(--line);color:var(--ink);
+  }
+  .btn-ghost:hover:not(:disabled){border-color:#CFC4EC;background:#FCFBFE}
+  .btn-ghost:disabled{opacity:.45;cursor:not-allowed}
+  .btn-row{display:flex;gap:10px;margin-top:10px}
+  .btn-row .btn{flex:1}
+  #open[aria-disabled="true"]{opacity:.5;pointer-events:none}
+  #save.is-editing{border-color:var(--purple-2);color:var(--purple);background:#FBF8FF}
+
+  .status{
+    display:flex;align-items:flex-start;gap:8px;
+    margin-top:12px;font-size:12.5px;color:var(--ink-faint);
+    min-height:19px;
+  }
+  .status.warn{color:var(--warn)}
+  .status.ok{color:var(--ok)}
+  .status svg{flex:0 0 auto;margin-top:2px}
+
+  /* ---------- Buttons ---------- */
+  .icon-btn{
+    flex:0 0 auto;width:24px;height:24px;border-radius:7px;
+    display:grid;place-items:center;cursor:pointer;
+    background:#fff;border:1px solid var(--line);color:var(--ink-soft);
+    transition:color .15s, border-color .15s, background .15s;
+    padding:0;
+  }
+  .icon-btn:hover{color:var(--purple);border-color:#CFC4EC;background:var(--purple-tint)}
+  .icon-btn.danger:hover{color:#DC2626;border-color:#F0AFAF;background:#FEF2F2}
+  .icon-btn:focus-visible{outline:2px solid var(--purple-3);outline-offset:1px}
+
+  /* ---------- Toast ---------- */
+  .toast{
+    position:fixed;left:50%;bottom:26px;transform:translate(-50%,14px);
+    background:var(--ink);color:#fff;font-size:13px;font-weight:500;
+    padding:11px 18px;border-radius:11px;
+    box-shadow:0 14px 34px -12px rgba(26,16,51,.6);
+    opacity:0;pointer-events:none;transition:opacity .2s, transform .2s;
+    z-index:50;max-width:calc(100vw - 40px);
+  }
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+
+  .foot{
+    margin-top:22px;text-align:center;font-size:11.5px;color:var(--ink-faint);
+  }
+
+  @media (max-width:1080px){
+    .shell{grid-template-columns:1fr}
+    .sidebar{position:static;max-height:none;order:2}
+    .main{order:1}
+    .saved-list{max-height:280px}
+  }
+  @media (max-width:900px){
+    .grid{grid-template-columns:1fr}
+    .out-panel{position:static}
+    .headline{font-size:23px}
+    body{padding:22px 14px 44px}
+  }
+  @media (max-width:560px){
+    .dest-grid{grid-template-columns:1fr}
+    .dest-body{display:flex;align-items:center;gap:10px;padding:11px 13px}
+    .dest-top{margin-bottom:0}
+    .two{grid-template-columns:1fr}
+    .panel{padding:18px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo" aria-hidden="true">B</span>
+      <span>
+        <span class="brand-name">BimaScore</span>
+        <span class="brand-sub">Marketing Tools</span>
+      </span>
+    </div>
+    <span class="pill"><span class="dot"></span> UTM Builder</span>
+  </header>
+
+  <div class="shell">
+
+    <!-- ============ SIDEBAR: saved links ============ -->
+    <aside class="sidebar" aria-label="Saved links">
+      <div class="side-head">
+        <h2>Saved links</h2>
+        <span class="count" id="count">0</span>
+      </div>
+
+      <ul class="saved-list" id="savedList"></ul>
+      <p class="side-empty" id="sideEmpty">No saved links yet. Build one, then press <strong>Save link</strong>.</p>
+      <button type="button" class="clear-all" id="clearAll" hidden>Clear all links</button>
+      <div class="side-foot">Click a link to edit it. Saved only in this browser.</div>
+    </aside>
+
+    <!-- ============ MAIN ============ -->
+    <div class="main">
+      <h1 class="headline">Build a clean campaign link</h1>
+      <p class="sub">Pick a destination, add source, medium and campaign — get one consistent, lowercase UTM link ready to share.</p>
+
+      <div class="grid">
+
+        <!-- form -->
+        <div class="col">
+          <section class="panel">
+            <h2 class="panel-title">Destination</h2>
+
+            <div class="dest-grid" role="radiogroup" aria-label="Destination">
+              <label class="dest">
+                <input type="radio" name="destination" value="https://bimascore.com" checked>
+                <span class="dest-body">
+                  <span class="dest-top"><span class="radio"></span><span class="dest-name">BimaScore</span></span>
+                  <span class="dest-host">bimascore.com</span>
+                </span>
+              </label>
+              <label class="dest">
+                <input type="radio" name="destination" value="https://clarity.bimascore.com">
+                <span class="dest-body">
+                  <span class="dest-top"><span class="radio"></span><span class="dest-name">Bima Clarity</span></span>
+                  <span class="dest-host">clarity.bimascore.com</span>
+                </span>
+              </label>
+              <label class="dest">
+                <input type="radio" name="destination" value="https://analyze.bimascore.com">
+                <span class="dest-body">
+                  <span class="dest-top"><span class="radio"></span><span class="dest-name">Bima Analyze</span></span>
+                  <span class="dest-host">analyze.bimascore.com</span>
+                </span>
+              </label>
+            </div>
+
+            <div class="field">
+              <label for="path">Page path <span class="opt">optional</span></label>
+              <div class="path-row">
+                <span class="path-prefix">/</span>
+                <input type="text" id="path" placeholder="blogs/health-insurance-guide" autocomplete="off" spellcheck="false">
+              </div>
+              <p class="hint">Leave empty to send people to the homepage.</p>
+            </div>
+
+            <h2 class="panel-title" style="margin-top:24px">Campaign details</h2>
+
+            <div class="field">
+              <label for="source">Source <span class="req" aria-hidden="true">*</span></label>
+              <input type="text" id="source" list="source-list" placeholder="google" autocomplete="off" spellcheck="false" required>
+              <p class="hint">Where the traffic comes from.</p>
+            </div>
+
+            <div class="field">
+              <label for="medium">Medium <span class="req" aria-hidden="true">*</span></label>
+              <input type="text" id="medium" list="medium-list" placeholder="cpc" autocomplete="off" spellcheck="false" required>
+              <p class="hint">The channel or marketing type.</p>
+            </div>
+
+            <div class="field">
+              <label for="campaign">Campaign <span class="req" aria-hidden="true">*</span></label>
+              <input type="text" id="campaign" list="campaign-list" placeholder="health-checkup-nov" autocomplete="off" spellcheck="false" required>
+              <p class="hint">The specific push, launch or offer.</p>
+            </div>
+
+            <details class="adv">
+              <summary>Advanced options (term &amp; content)</summary>
+              <div class="adv-body">
+                <div class="two">
+                  <div class="field" style="margin-bottom:0">
+                    <label for="term">Term <span class="opt">optional</span></label>
+                    <input type="text" id="term" placeholder="family-floater" autocomplete="off" spellcheck="false">
+                  </div>
+                  <div class="field" style="margin-bottom:0">
+                    <label for="content">Content <span class="opt">optional</span></label>
+                    <input type="text" id="content" placeholder="hero-cta" autocomplete="off" spellcheck="false">
+                  </div>
+                </div>
+                <p class="hint" style="margin-top:10px">Use <strong>term</strong> for paid keywords and <strong>content</strong> to tell two creatives apart.</p>
+              </div>
+            </details>
+
+            <div class="btn-row" style="margin-top:18px">
+              <button type="button" class="btn btn-ghost" id="reset">Reset</button>
+            </div>
+          </section>
+        </div>
+
+        <!-- output -->
+        <div class="col">
+          <section class="panel out-panel">
+            <h2 class="panel-title">Your link</h2>
+
+            <div class="edit-bar" id="editBar" hidden>
+              <span class="edit-dot"></span>
+              <span>Editing a saved link</span>
+              <button type="button" class="link-btn" id="detach">Save as new instead</button>
+            </div>
+
+            <div class="url-box" id="urlBox" aria-live="polite">
+              <span class="url-empty">Fill source, medium and campaign to generate your link.</span>
+            </div>
+
+            <button type="button" class="btn btn-primary" id="copy" disabled>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copy link
+            </button>
+
+            <div class="btn-row">
+              <button type="button" class="btn btn-ghost" id="save" disabled>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+                <span id="saveLabel">Save link</span>
+              </button>
+              <a class="btn btn-ghost" id="open" href="#" target="_blank" rel="noopener" aria-disabled="true" style="text-decoration:none">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14 21 3"/></svg>
+                Test link
+              </a>
+            </div>
+
+            <p class="status" id="status">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+              <span id="statusText">Links are auto-lowercased and spaces become hyphens.</span>
+            </p>
+          </section>
+        </div>
+      </div>
+
+      <p class="foot">BimaScore · internal marketing tool · saved links stay in your browser</p>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<datalist id="source-list">
+  <option value="google"></option>
+  <option value="facebook"></option>
+  <option value="instagram"></option>
+  <option value="internal"></option>
+  <option value="team"></option>
+  <option value="linkedin"></option>
+  <option value="twitter"></option>
+  <option value="youtube"></option>
+  <option value="newsletter"></option>
+  <option value="whatsapp"></option>
+  <option value="partner"></option>
+  <option value="direct"></option>
+</datalist>
+
+<datalist id="medium-list">
+  <option value="cpc"></option>
+  <option value="paid-social"></option>
+  <option value="email"></option>
+  <option value="social"></option>
+  <option value="organic"></option>
+  <option value="referral"></option>
+  <option value="display"></option>
+  <option value="influencer"></option>
+  <option value="affiliate"></option>
+  <option value="sms"></option>
+  <option value="via-team"></option>
+</datalist>
+
+<datalist id="campaign-list">
+  <option value="brand-awareness"></option>
+  <option value="health-checkup"></option>
+  <option value="policy-review"></option>
+  <option value="claim-clarity"></option>
+  <option value="family-floater"></option>
+</datalist>
+
+<script>
+(function () {
+  "use strict";
+
+  var $ = function (id) { return document.getElementById(id); };
+
+  var els = {
+    path: $("path"),
+    source: $("source"),
+    medium: $("medium"),
+    campaign: $("campaign"),
+    term: $("term"),
+    content: $("content"),
+    urlBox: $("urlBox"),
+    copy: $("copy"),
+    save: $("save"),
+    saveLabel: $("saveLabel"),
+    open: $("open"),
+    status: $("status"),
+    statusText: $("statusText"),
+    reset: $("reset"),
+    editBar: $("editBar"),
+    detach: $("detach"),
+    savedList: $("savedList"),
+    sideEmpty: $("sideEmpty"),
+    clearAll: $("clearAll"),
+    count: $("count"),
+    toast: $("toast")
+  };
+
+  var REQUIRED = [
+    { el: els.source, key: "utm_source", label: "source" },
+    { el: els.medium, key: "utm_medium", label: "medium" },
+    { el: els.campaign, key: "utm_campaign", label: "campaign" }
+  ];
+  var OPTIONAL = [
+    { el: els.term, key: "utm_term" },
+    { el: els.content, key: "utm_content" }
+  ];
+
+  var SAVED_KEY = "bimascore_utm_saved";
+  var LEGACY_KEY = "bimascore_utm_recent";
+  var editingId = null;
+  var currentUrl = "";
+
+  /* ---------- helpers ---------- */
+
+  function clean(value) {
+    return String(value || "")
+      .trim()
+      .toLowerCase()
+      .replace(/[\s_]+/g, "-")
+      .replace(/[^a-z0-9\-./]/g, "")
+      .replace(/-{2,}/g, "-")
+      .replace(/^-+|-+$/g, "");
+  }
+
+  function cleanPath(value) {
+    return String(value || "")
+      .trim()
+      .replace(/^https?:\/\/[^/]+/i, "")
+      .replace(/^\/+/, "")
+      .replace(/\s+/g, "-")
+      .replace(/\/{2,}/g, "/");
+  }
+
+  function destination() {
+    var checked = document.querySelector('input[name="destination"]:checked');
+    return checked ? checked.value : "https://bimascore.com";
+  }
+
+  function esc(str) {
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
+
+  function uid() {
+    return "u" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  }
+
+  function toast(message) {
+    els.toast.textContent = message;
+    els.toast.classList.add("show");
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function () { els.toast.classList.remove("show"); }, 2000);
+  }
+
+  function setStatus(text, type) {
+    els.statusText.textContent = text;
+    els.status.className = "status" + (type ? " " + type : "");
+  }
+
+  function whenLabel(ts) {
+    if (!ts) return "";
+    var d = new Date(ts);
+    var now = new Date();
+    if (d.toDateString() === now.toDateString()) {
+      return d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+    }
+    return d.toLocaleDateString(undefined, { day: "numeric", month: "short" });
+  }
+
+  /* ---------- build ---------- */
+
+  function buildParts() {
+    var base = destination();
+    var path = cleanPath(els.path.value);
+    if (path) base += "/" + path;
+
+    var params = [];
+    REQUIRED.concat(OPTIONAL).forEach(function (f) {
+      var v = clean(f.el.value);
+      if (v) params.push({ key: f.key, value: v });
+    });
+
+    return { base: base, params: params };
+  }
+
+  function buildUrl() {
+    var parts = buildParts();
+    if (!parts.params.length) return "";
+    var query = parts.params.map(function (p) {
+      return p.key + "=" + encodeURIComponent(p.value);
+    }).join("&");
+    return parts.base + "?" + query;
+  }
+
+  function render() {
+    var parts = buildParts();
+    currentUrl = buildUrl();
+
+    var missing = REQUIRED.filter(function (f) { return !clean(f.el.value); })
+                          .map(function (f) { return f.label; });
+
+    REQUIRED.forEach(function (f) {
+      var empty = !clean(f.el.value);
+      f.el.classList.toggle("invalid", empty && f.el.dataset.touched === "1");
+    });
+
+    var ready = currentUrl && missing.length === 0;
+
+    if (currentUrl) {
+      var html = '<span class="base">' + esc(parts.base) + '</span><span class="sep">?</span>';
+      html += parts.params.map(function (p) {
+        return '<span class="k">' + esc(p.key) + '</span><span class="sep">=</span><span class="v">' +
+               esc(p.value) + '</span>';
+      }).join('<span class="sep">&amp;</span>');
+      els.urlBox.innerHTML = html;
+    } else {
+      els.urlBox.innerHTML = '<span class="url-empty">Fill source, medium and campaign to generate your link.</span>';
+    }
+
+    els.copy.disabled = !ready;
+    els.save.disabled = !ready;
+
+    if (ready) {
+      els.open.href = currentUrl;
+      els.open.removeAttribute("aria-disabled");
+      setStatus("Looks good — " + parts.params.length + " parameter" + (parts.params.length > 1 ? "s" : "") + " added.", "ok");
+    } else {
+      els.open.href = "#";
+      els.open.setAttribute("aria-disabled", "true");
+      if (missing.length) {
+        var list = missing.length > 1
+          ? missing.slice(0, -1).join(", ") + " and " + missing[missing.length - 1]
+          : missing[0];
+        setStatus("Add " + list + " to finish the link.", "warn");
+      } else {
+        setStatus("Links are auto-lowercased and spaces become hyphens.");
+      }
+    }
+  }
+
+  /* ---------- snapshot ---------- */
+
+  function snapshot() {
+    return {
+      destination: destination(),
+      path: cleanPath(els.path.value),
+      source: clean(els.source.value),
+      medium: clean(els.medium.value),
+      campaign: clean(els.campaign.value),
+      term: clean(els.term.value),
+      content: clean(els.content.value)
+    };
+  }
+
+  function applySnapshot(s) {
+    var radio = document.querySelector('input[name="destination"][value="' + s.destination + '"]');
+    if (radio) radio.checked = true;
+    els.path.value = s.path || "";
+    els.source.value = s.source || "";
+    els.medium.value = s.medium || "";
+    els.campaign.value = s.campaign || "";
+    els.term.value = s.term || "";
+    els.content.value = s.content || "";
+    REQUIRED.forEach(function (f) { delete f.el.dataset.touched; });
+    render();
+  }
+
+  /* ---------- storage ---------- */
+
+  function loadSaved() {
+    try {
+      var raw = localStorage.getItem(SAVED_KEY);
+      var list = raw ? JSON.parse(raw) : [];
+      return Array.isArray(list) ? list : [];
+    } catch (e) { return []; }
+  }
+
+  function persist(list) {
+    try { localStorage.setItem(SAVED_KEY, JSON.stringify(list.slice(0, 50))); } catch (e) {}
+  }
+
+  // move old "recent links" (url only) into the new saved format
+  function migrateLegacy() {
+    var raw;
+    try { raw = localStorage.getItem(LEGACY_KEY); } catch (e) { return; }
+    if (!raw) return;
+
+    var list = loadSaved();
+    try {
+      JSON.parse(raw).forEach(function (old) {
+        if (!old || !old.url) return;
+        var u = new URL(old.url);
+        list.push({
+          id: uid(),
+          destination: u.origin,
+          path: decodeURIComponent(u.pathname).replace(/^\/+/, ""),
+          source: u.searchParams.get("utm_source") || "",
+          medium: u.searchParams.get("utm_medium") || "",
+          campaign: u.searchParams.get("utm_campaign") || "",
+          term: u.searchParams.get("utm_term") || "",
+          content: u.searchParams.get("utm_content") || "",
+          url: old.url,
+          updatedAt: Date.now()
+        });
+      });
+    } catch (e) {}
+
+    persist(list);
+    try { localStorage.removeItem(LEGACY_KEY); } catch (e) {}
+  }
+
+  /* ---------- sidebar ---------- */
+
+  function syncEditUI() {
+    var editing = !!editingId;
+    els.editBar.hidden = !editing;
+    els.saveLabel.textContent = editing ? "Update link" : "Save link";
+    els.save.classList.toggle("is-editing", editing);
+  }
+
+  function setEditing(id) {
+    editingId = id;
+    syncEditUI();
+    renderSidebar();
+  }
+
+  function openLink(item) {
+    applySnapshot(item);
+    setEditing(item.id);
+    toast("Loaded — edit it, then press Update");
+    if (window.matchMedia("(max-width:1080px)").matches) {
+      document.querySelector(".main").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
+
+  function removeLink(id) {
+    persist(loadSaved().filter(function (i) { return i.id !== id; }));
+    if (editingId === id) { editingId = null; syncEditUI(); }
+    renderSidebar();
+    toast("Link removed");
+  }
+
+  function icon(paths) {
+    return '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+           'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + paths + "</svg>";
+  }
+
+  function renderSidebar() {
+    var list = loadSaved().slice().sort(function (a, b) {
+      return (b.updatedAt || 0) - (a.updatedAt || 0);
+    });
+
+    els.savedList.innerHTML = "";
+    els.count.textContent = list.length;
+    els.sideEmpty.style.display = list.length ? "none" : "block";
+    els.clearAll.hidden = !list.length;
+
+    list.forEach(function (item) {
+      var li = document.createElement("li");
+      li.className = "saved-item" + (item.id === editingId ? " active" : "");
+
+      var open = document.createElement("button");
+      open.type = "button";
+      open.className = "saved-open";
+      open.title = "Edit this link\n" + item.url;
+
+      var title = document.createElement("span");
+      title.className = "saved-campaign";
+      title.textContent = item.campaign || "(no campaign)";
+
+      var sub = document.createElement("span");
+      sub.className = "saved-sub";
+      var bits = [item.source, item.medium].filter(Boolean).join(" · ");
+      sub.textContent = bits + (bits ? " · " : "") + whenLabel(item.updatedAt);
+
+      open.appendChild(title);
+      open.appendChild(sub);
+      open.addEventListener("click", function () { openLink(item); });
+
+      var actions = document.createElement("span");
+      actions.className = "saved-actions";
+
+      var copyBtn = document.createElement("button");
+      copyBtn.type = "button";
+      copyBtn.className = "icon-btn";
+      copyBtn.title = "Copy link";
+      copyBtn.setAttribute("aria-label", "Copy " + (item.campaign || "link"));
+      copyBtn.innerHTML = icon('<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>');
+      copyBtn.addEventListener("click", function () { writeClipboard(item.url, "Link copied"); });
+
+      var editBtn = document.createElement("button");
+      editBtn.type = "button";
+      editBtn.className = "icon-btn";
+      editBtn.title = "Edit / update";
+      editBtn.setAttribute("aria-label", "Edit " + (item.campaign || "link"));
+      editBtn.innerHTML = icon('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>');
+      editBtn.addEventListener("click", function () { openLink(item); });
+
+      var delBtn = document.createElement("button");
+      delBtn.type = "button";
+      delBtn.className = "icon-btn danger";
+      delBtn.title = "Remove";
+      delBtn.setAttribute("aria-label", "Remove " + (item.campaign || "link"));
+      delBtn.innerHTML = icon('<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/>');
+      delBtn.addEventListener("click", function () { removeLink(item.id); });
+
+      actions.appendChild(copyBtn);
+      actions.appendChild(editBtn);
+      actions.appendChild(delBtn);
+
+      li.appendChild(open);
+      li.appendChild(actions);
+      els.savedList.appendChild(li);
+    });
+  }
+
+  /* ---------- save / update ---------- */
+
+  function saveLink() {
+    if (!currentUrl || els.save.disabled) return;
+
+    var list = loadSaved();
+    var data = snapshot();
+    var now = Date.now();
+    var index = -1;
+
+    if (editingId) {
+      index = list.findIndex(function (i) { return i.id === editingId; });
+    } else {
+      index = list.findIndex(function (i) { return i.url === currentUrl; });
+    }
+
+    if (index > -1) {
+      list[index] = Object.assign({}, list[index], data, { url: currentUrl, updatedAt: now });
+      persist(list);
+      renderSidebar();
+      toast(editingId ? "Link updated" : "Already saved — updated");
+      if (!editingId) setEditing(list[index].id);
+    } else {
+      var item = Object.assign({ id: uid(), url: currentUrl, updatedAt: now }, data);
+      list.unshift(item);
+      persist(list);
+      renderSidebar();
+      toast("Link saved");
+      setEditing(item.id);
+    }
+  }
+
+  /* ---------- clipboard ---------- */
+
+  function writeClipboard(text, message) {
+    var done = function () { toast(message || "Link copied"); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(function () { legacyCopy(text, done); });
+    } else {
+      legacyCopy(text, done);
+    }
+  }
+
+  function legacyCopy(text, done) {
+    var ta = document.createElement("textarea");
+    ta.value = text;
+    ta.setAttribute("readonly", "");
+    ta.style.position = "fixed";
+    ta.style.top = "-1000px";
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand("copy"); done(); }
+    catch (e) { toast("Copy failed — select the link manually"); }
+    document.body.removeChild(ta);
+  }
+
+  /* ---------- events ---------- */
+
+  var inputs = [els.path, els.source, els.medium, els.campaign, els.term, els.content];
+
+  inputs.forEach(function (input) {
+    input.addEventListener("input", render);
+
+    input.addEventListener("blur", function () {
+      var before = input.value;
+      var after = input === els.path ? cleanPath(before) : clean(before);
+      if (after !== before) {
+        input.value = after;
+        toast("Auto-formatted to “" + after + "”");
+      }
+      if (input.dataset.required === "1") input.dataset.touched = "1";
+      render();
+    });
+  });
+
+  REQUIRED.forEach(function (f) { f.el.dataset.required = "1"; });
+
+  document.querySelectorAll('input[name="destination"]').forEach(function (radio) {
+    radio.addEventListener("change", render);
+  });
+
+  els.copy.addEventListener("click", function () {
+    if (!currentUrl) return;
+    writeClipboard(currentUrl, "Link copied");
+  });
+
+  els.save.addEventListener("click", saveLink);
+
+  els.detach.addEventListener("click", function () {
+    editingId = null;
+    syncEditUI();
+    renderSidebar();
+    toast("Editing detached — next save creates a new link");
+  });
+
+  els.open.addEventListener("click", function (e) {
+    if (!currentUrl) e.preventDefault();
+  });
+
+  els.reset.addEventListener("click", function () {
+    inputs.forEach(function (i) {
+      i.value = "";
+      delete i.dataset.touched;
+      i.classList.remove("invalid");
+    });
+    document.querySelector('input[name="destination"][value="https://bimascore.com"]').checked = true;
+    editingId = null;
+    syncEditUI();
+    renderSidebar();
+    render();
+    els.source.focus();
+  });
+
+  els.clearAll.addEventListener("click", function () {
+    if (!loadSaved().length) return;
+    if (!window.confirm("Remove all saved links? This cannot be undone.")) return;
+    persist([]);
+    editingId = null;
+    syncEditUI();
+    renderSidebar();
+    toast("All saved links removed");
+  });
+
+  document.addEventListener("keydown", function (e) {
+    if ((e.metaKey || e.ctrlKey) && e.key === "Enter" && currentUrl) {
+      e.preventDefault();
+      els.copy.click();
+    }
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "s") {
+      e.preventDefault();
+      saveLink();
+    }
+  });
+
+  migrateLegacy();
+  syncEditUI();
+  renderSidebar();
+  render();
+})();
+</script>
+</body>
+</html>
