@@ -59,6 +59,21 @@
 - Values persist after reload.
 - No console errors, no horizontal overflow at 1000px and 556px widths.
 
+## 03 November 2026 — repository and deploy
+
+### Completed
+- Wrote `README.md`.
+- Pushed the project to `github.com/theprembhatt/UTM-Builder` (branch `main`).
+- Enabled GitHub Pages from `main` / root.
+
+### Live URL
+- https://theprembhatt.github.io/UTM-Builder/
+
+### Notes
+- No secrets are stored in this repo.
+- Any future push to `main` republishes the tool automatically.
+
+
 
 ## 03 November 2026 — QA of clarity.bimascore.com (pre-ship)
 
