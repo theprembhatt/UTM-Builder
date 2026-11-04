@@ -73,6 +73,22 @@
 - No secrets are stored in this repo.
 - Any future push to `main` republishes the tool automatically.
 
+## 04 November 2026 — UTM naming standard (agreed in chat)
+
+### Values in use
+| Source | Medium | Campaign | Meaning |
+|---|---|---|---|
+| linkedin | post | launch | LinkedIn organic post |
+| chatgpt | paid-ads | launch | ChatGPT paid ads |
+| internal | via-team | — | Shared internally by the team |
+
+### Decisions
+- Paid traffic uses `paid-ads` (or `paid-social`) — never bare `ads`, because GA4 leaves `ads` in "Unassigned".
+- One campaign name across platforms (`launch`) so sources compare inside a single campaign row.
+- `utm_content` is used to separate individual ads/creatives.
+- Values are always lowercase and hyphenated.
+
+
 
 
 ## 03 November 2026 — QA of clarity.bimascore.com (pre-ship)
